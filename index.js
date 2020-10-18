@@ -21,21 +21,23 @@ var crypto = require('crypto');
 
 
 function removeKeys(obj, keys) {
-    for (var prop in obj) {
-        if(obj.hasOwnProperty(prop)) {
-            switch(typeof(obj[prop])) {
-                case 'object':
-                    if(keys.indexOf(prop) > -1) {
-                        delete obj[prop];
-                    } else {
-                        removeKeys(obj[prop], keys);
-                    }
-                    break;
-                default:
-                    if(keys.indexOf(prop) > -1) {
-                        delete obj[prop];
-                    }
-                    break;
+    for (var key in keys) {
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                switch (typeof (obj[prop])) {
+                    case 'object':
+                        if (key.indexOf(prop) > -1) {
+                            delete obj[prop];
+                        } else {
+                            removeKeys(obj[prop], key);
+                        }
+                        break;
+                    default:
+                        if (key.indexOf(prop) > -1) {
+                            delete obj[prop];
+                        }
+                        break;
+                }
             }
         }
     }
@@ -50,7 +52,7 @@ function breakdownCollection(collectionPath) {
     members.forEach((member => {
         var nameList = [];
         member["items"]["members"].forEach((item => {
-            itemWithoutIds = removeKeys(item.toJSON(), "id");
+            itemWithoutIds = removeKeys(item.toJSON(), ["id"]);
             var hash = generateHash(itemWithoutIds);
             name = 'items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
 
@@ -61,7 +63,7 @@ function breakdownCollection(collectionPath) {
         member["item"] = nameList;
 
 
-        memberWithoutIds = removeKeys(member.toJSON(), "id");
+        memberWithoutIds = removeKeys(member.toJSON(), ["id"]);
         var hash = generateHash(memberWithoutIds);
         name = 'itemGroups/' + member["name"].replace(/ /g, "-") + "." + hash + ".json";
         fs.writeFileSync(name, JSON.stringify(member.toJSON(), null, 2));
@@ -70,9 +72,7 @@ function breakdownCollection(collectionPath) {
 
     myCollection["item"] = nameList2;
 
-    collectionWithoutIds = removeKeys(myCollection.toJSON(), "id");
-    collectionWithoutIds = removeKeys(collectionWithoutIds, "postman_id");
-    collectionWithoutIds = removeKeys(collectionWithoutIds, "_postman_id");
+    collectionWithoutIds = removeKeys(myCollection.toJSON(), ["id","postman_id","_postman_id"]);
     var hash = generateHash(collectionWithoutIds);
     name = 'collections/' + myCollection["name"].replace(/ /g, "-") + "." + hash + ".json";
     fs.writeFileSync(name, JSON.stringify(myCollection.toJSON(), null, 2));
@@ -105,19 +105,14 @@ function reconstructCollection(collectionPath) {
 reconstructCollection('collections/CIAM_internet_TPP_Initiated_Consent_Revocation.20a3322ca5c5c8575acb608a399cee86.json');
 
 function assertTransform(initialPath, reconstructedPath) {
-    var shortenedCollection = readJson(reconstructedPath);
-
-    var myCollection2 = new Collection(readJson(initialPath));
-    shortenedCollection2 = removeKeys(myCollection2, "id");
-    shortenedCollection2 = removeKeys(shortenedCollection2, "postman_id");
-    shortenedCollection2 = removeKeys(shortenedCollection2, "_postman_id");
-
-    shortenedCollection = removeKeys(shortenedCollection, "id");
-    shortenedCollection = removeKeys(shortenedCollection, "postman_id");
-    shortenedCollection = removeKeys(shortenedCollection, "_postman_id");
-    var hash1 = generateHash(shortenedCollection2);
-    var hash2 = generateHash(shortenedCollection);
-    if(hash1===hash2){
+    function genHashFromPath(path){
+        var data = readJson(path);
+        data = removeKeys(data);
+        return generateHash(data, ["id","postman_id","_postman_id"]);
+    }
+    var initialHash = genHashFromPath(initialPath);
+    var reconstructedHash = genHashFromPath(reconstructedPath);
+    if(initialHash===reconstructedHash){
         console.log("Round trip succeeded.")
     } else {
         console.log("Round trip failed.")
