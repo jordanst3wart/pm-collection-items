@@ -44,14 +44,14 @@ function removeKeys(obj, keys) {
 
 function breakdownCollection(collectionPath) {
 // Load a collection to memory from a JSON file on disk (say, sample-collection.json)
-    var myCollection = new Collection(JSON.parse(fs.readFileSync(collectionPath).toString()));
+    var myCollection = new Collection(readJson(collectionPath));
     var members = myCollection["items"]["members"];
     nameList2 = [];
     members.forEach((member => {
         var nameList = [];
         member["items"]["members"].forEach((item => {
             itemWithoutIds = removeKeys(item.toJSON(), "id");
-            var hash = crypto.createHash('md5').update(JSON.stringify(itemWithoutIds)).digest("hex");
+            var hash = generateHash(itemWithoutIds);
             name = 'items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
 
 
@@ -62,7 +62,7 @@ function breakdownCollection(collectionPath) {
 
 
         memberWithoutIds = removeKeys(member.toJSON(), "id");
-        var hash = crypto.createHash('md5').update(JSON.stringify(memberWithoutIds)).digest("hex");
+        var hash = generateHash(memberWithoutIds);
         name = 'itemGroups/' + member["name"].replace(/ /g, "-") + "." + hash + ".json";
         fs.writeFileSync(name, JSON.stringify(member.toJSON(), null, 2));
         nameList2.push(name);
@@ -73,24 +73,24 @@ function breakdownCollection(collectionPath) {
     collectionWithoutIds = removeKeys(myCollection.toJSON(), "id");
     collectionWithoutIds = removeKeys(collectionWithoutIds, "postman_id");
     collectionWithoutIds = removeKeys(collectionWithoutIds, "_postman_id");
-    var hash = crypto.createHash('md5').update(JSON.stringify(collectionWithoutIds)).digest("hex");
+    var hash = generateHash(collectionWithoutIds);
     name = 'collections/' + myCollection["name"].replace(/ /g, "-") + "." + hash + ".json";
     fs.writeFileSync(name, JSON.stringify(myCollection.toJSON(), null, 2));
 }
 breakdownCollection('CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json');
 
 // reconstructed
-function reconstructCollection(collectionpath) {
-    var shortenedCollection = JSON.parse(fs.readFileSync(collectionpath).toString());
+function reconstructCollection(collectionPath) {
+    var shortenedCollection = readJson(collectionPath);
 
     newItemGroups = [];
     shortenedCollection["item"].map((member1 => {
-        item1 = JSON.parse(fs.readFileSync(member1).toString());
+        item1 = readJson(member1);
         newItemGroups.push(item1);
 
         newItems = []
         item1["item"].map((member2) => {
-            item2 = JSON.parse(fs.readFileSync(member2).toString());
+            item2 = readJson(member2);
             newItems.push(item2);
         })
         item1["item"] = newItems;
@@ -105,9 +105,9 @@ function reconstructCollection(collectionpath) {
 reconstructCollection('collections/CIAM_internet_TPP_Initiated_Consent_Revocation.20a3322ca5c5c8575acb608a399cee86.json');
 
 function assertTransform(initialPath, reconstructedPath) {
-    var shortenedCollection = JSON.parse(fs.readFileSync(reconstructedPath).toString());
+    var shortenedCollection = readJson(reconstructedPath);
 
-    var myCollection2 = new Collection(JSON.parse(fs.readFileSync(initialPath).toString()));
+    var myCollection2 = new Collection(readJson(initialPath));
     shortenedCollection2 = removeKeys(myCollection2, "id");
     shortenedCollection2 = removeKeys(shortenedCollection2, "postman_id");
     shortenedCollection2 = removeKeys(shortenedCollection2, "_postman_id");
@@ -115,13 +115,21 @@ function assertTransform(initialPath, reconstructedPath) {
     shortenedCollection = removeKeys(shortenedCollection, "id");
     shortenedCollection = removeKeys(shortenedCollection, "postman_id");
     shortenedCollection = removeKeys(shortenedCollection, "_postman_id");
-    var hash1 = crypto.createHash('md5').update(JSON.stringify(shortenedCollection2)).digest("hex");
-    var hash2 = crypto.createHash('md5').update(JSON.stringify(shortenedCollection)).digest("hex");
+    var hash1 = generateHash(shortenedCollection2);
+    var hash2 = generateHash(shortenedCollection);
     if(hash1===hash2){
         console.log("Round trip succeeded.")
     } else {
         console.log("Round trip failed.")
     }
+}
+
+function readJson(path){
+    return JSON.parse(fs.readFileSync(path).toString());
+}
+
+function generateHash(json){
+    crypto.createHash('md5').update(JSON.stringify(json)).digest("hex");
 }
 
 assertTransform('CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json','reconstructed/CIAM_internet_TPP_Initiated_Consent_Revocation.json');
