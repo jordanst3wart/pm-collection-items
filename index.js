@@ -11,29 +11,24 @@
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
+var Collection = require("postman-collection").Collection;
+var fs = require('fs'); // needed to read JSON file from disk
+var ItemGroup = require('postman-collection').ItemGroup;
+var crypto = require('crypto');
+var mPath = require('path');
+
 
 const parser = new ArgumentParser({
     description: 'Argparse example'
 });
 
 parser.add_argument('-v', '--version', { action: 'version', version });
-parser.add_argument('-f', '--foo', { help: 'foo bar' });
-parser.add_argument('-b', '--bar', { help: 'bar foo' });
-parser.add_argument('--baz', { help: 'baz bar' });
-parser.add_argument('--do-stuff', { help: 'baz bar', action: "store_true" });
-//parser.add_argument("-v", "--verbose", action="store_true",
-//    help="increase output verbosity")
-
-// console.dir(parser.parse_args());
-
-var Collection = require("postman-collection").Collection;
-var fs = require('fs'); // needed to read JSON file from disk
-var ItemGroup = require('postman-collection').ItemGroup;
-var crypto = require('crypto');
-var mPath = require('path');
-var name;
+parser.add_argument('-r', '--reconstructCollection', { help: 'Reconstructs collections in ___ dir', action: "store_true" });
+parser.add_argument('-b','--breakdowncollection', { help: 'Breaks down collections in ___ dir', action: "store_true" });
+parser.add_argument('-a','--assertTransform', { help: 'Asserts the collections can be broken down and reconstructed via matching the hash', action: "store_true" });
 
 function breakdownCollection(collectionPath) {
+    var name;
 // Load a collection to memory from a JSON file on disk (say, sample-collection.json)
     var myCollection = new Collection(readJson(collectionPath));
     var members = myCollection["items"]["members"];
@@ -88,8 +83,10 @@ function reconstructCollection(collectionPath) {
 
     shortenedCollection["item"] = newItemGroups;
 
-    name = "reconstructed/CIAM_internet_TPP_Initiated_Consent_Revocation.json"
-    fs.writeFileSync(name, JSON.stringify(shortenedCollection, null, 2));
+    var filenameSplit = filename.split('.')
+    var path = "reconstructed/" + filenameSplit[0] + "." + filenameSplit[2];
+    fs.writeFileSync(path, JSON.stringify(shortenedCollection, null, 2));
+    return path;
 }
 
 function assertTransform(initialPath, reconstructedPath) {
@@ -103,15 +100,16 @@ function assertTransform(initialPath, reconstructedPath) {
     var initialHash = generateHash(data);
     var reconstructedHash = genHashFromPath(reconstructedPath);
     if(initialHash===reconstructedHash && initialHash !== undefined){
-        console.log("Round trip succeeded.")
+        console.log("Round trip succeeded.");
     } else {
-        console.log("Round trip failed.")
+        console.log("Round trip failed.");
+        console.log("InitialHash: " + initialHash);
+        console.log("reconstructedHash: " + reconstructedHash);
     }
     //fs.writeFileSync("file1.json", JSON.stringify(item.toJSON(), null, 2));
-    console.log(initialHash)
 }
 
-// from: https://gist.github.com/aurbano/383e691368780e7f5c98
+// modified from: https://gist.github.com/aurbano/383e691368780e7f5c98
 function removeKeys(obj, keys) {
     //console.log(typeof keys);
     keys.map((key => {
@@ -133,7 +131,7 @@ function removeKeys(obj, keys) {
                 }
             }
         }
-        return obj;
+        //return obj;
     }))
     return obj;
 }
@@ -153,10 +151,10 @@ function compare(json1,json2){
 }
 
 // TODO iterate over all JSON connections
-var path = breakdownCollection('CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json');
-console.log(path);
-reconstructCollection(path);
-assertTransform('CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json','reconstructed/CIAM_internet_TPP_Initiated_Consent_Revocation.json');
+var pathBreakdown = breakdownCollection('input/CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json');
+var pathReconstruct = reconstructCollection(pathBreakdown);
+console.log(pathBreakdown, pathReconstruct)
+assertTransform('input/CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json', pathReconstruct);
 
 // TODO test recosntructed can be loaded into Newman, and Postman
 

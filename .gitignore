@@ -1,0 +1,7 @@
+items/
+collection/
+.idea/
+node_modules/
+
+collection-poc.iml
+*.iml
