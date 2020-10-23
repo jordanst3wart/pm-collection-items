@@ -1,0 +1,14 @@
+{
+  "name": "Positive",
+  "item": [
+    "resources/sample-output/items/Introspect-the-Refresh-Token---Before-Delete.351f3bed10110fc8b16b3d01212785a4.json",
+    "resources/sample-output/items/Revoke-Refresh-Token.c1f75b41988086c520a371521a1da1ed.json",
+    "resources/sample-output/items/Introspect-the-Refresh-Token---After-Delete.533c58d7137bb31796e4d3d4fd7b6224.json",
+    "resources/sample-output/items/Get-access-token-for-Consent-Lookup.6f553ca77d6010232fd79de432b0afc5.json",
+    "resources/sample-output/items/Get-Consent-After-Revocation.f8136db4c9bfb0096484c2d2ebede5b3.json",
+    "resources/sample-output/items/Get-Access-Token-for-ConsentRT-Lookup.d0d307894004741f816d0ac878304d9f.json",
+    "resources/sample-output/items/Get-Consent-RT-After-Revocation.415814eb23c68fd6dc251c0e684956e7.json"
+  ],
+  "event": [],
+  "protocolProfileBehavior": {}
+}

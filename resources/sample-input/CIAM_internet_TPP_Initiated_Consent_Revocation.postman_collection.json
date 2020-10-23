@@ -1,0 +1,2085 @@
+{
+	"info": {
+		"_postman_id": "0de2bbc7-364a-4f06-8795-9a3dadc63792",
+		"name": "CIAM_internet_TPP_Initiated_Consent_Revocation",
+		"description": "This collection of requests create a valid consent, access token and refresh token using AU Open Banking Grant Consent Flow. \nThe refresh token related consent and consentrt objects are then revoked using the \"Revocation Endpoint\" of PingFederate and results are validated accordingly.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check Mock Components and TLSMA",
+			"item": [
+				{
+					"name": "Conditionally skip tests",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "86b1fb5f-d8ac-4cc6-bca7-21b0df5a1ff2",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "c03ba84e-8507-4f44-94a0-44ee6d670e7e",
+								"exec": [
+									"//stop execution if IDP or Client is not accessible",
+									"if (pm.environment.get('preferred_idp') !== pm.environment.get('dev0_idp') || pm.environment.get('mock_client_enabled') !== true || pm.environment.get('enable_tlsma_tests') !== true) {",
+									"  postman.setNextRequest(null);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "postman-echo.com/get",
+							"host": [
+								"postman-echo",
+								"com"
+							],
+							"path": [
+								"get"
+							]
+						},
+						"description": "This request will stop execution of further requests when IDP is not accessible."
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b358d519-39f2-49c7-bd35-9b609df991fe",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "32244f48-b058-45a0-935d-c01696f82f16",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Install Javascript libraries",
+			"item": [
+				{
+					"name": "Init jsrsasign",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "11ad7a72-afe0-4fc0-ada9-46333fdf555c",
+								"exec": [
+									"pm.environment.set(\"jsrsasign-js\", responseBody);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "cfc97b61-72cf-420a-958b-659c523b0c2a",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js",
+							"protocol": "http",
+							"host": [
+								"kjur",
+								"github",
+								"io"
+							],
+							"path": [
+								"jsrsasign",
+								"jsrsasign-latest-all-min.js"
+							]
+						},
+						"description": "This is a pre-requisite to implement private key jwt signed keys to retrieve an access token from PingFederate."
+					},
+					"response": []
+				}
+			],
+			"description": "Install Javascript libraries used in the whole collection",
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Create Consent&Refresh Token",
+			"item": [
+				{
+					"name": "Send TPP Payload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "fcedda46-27da-4400-a7df-23c05ed370ff",
+								"exec": [
+									"/* loading of the jsrsasign library into Postman Sandbox */",
+									"var navigator = {}; //fake a navigator object for the lib",
+									"var window = {}; //fake a window object for the lib",
+									"eval(pm.environment.get(\"jsrsasign-js\")); //import javascript jsrsasign",
+									"",
+									"// define jwt header",
+									"var header = {",
+									"\t\"typ\": \"JWT\",",
+									"\t\"alg\": \"PS256\"",
+									"};",
+									"header.kid = pm.variables.get(\"tpp_kid\");",
+									"",
+									"// define jwt payload",
+									"var data = {",
+									"  \"claims\": {",
+									"    \"sharing_duration\": 31536000,",
+									"    \"id_token\": {",
+									"      \"acr\": {",
+									"        \"essential\": true,",
+									"        \"values\": [\"urn:cds.au:cdr:2\"]",
+									"      }",
+									"    }",
+									"  }",
+									"};",
+									"",
+									"var scopes = pm.variables.get(\"tpp_scopes\");",
+									"// no need to test profile scope yet since the client does not have it enabled",
+									"pm.variables.set(\"tpp_au_scopes\", scopes);",
+									"",
+									"// add variable data to payload",
+									"data.scope = pm.variables.get(\"tpp_au_scopes\");",
+									"data.response_type = pm.variables.get(\"tpp_responseType\");",
+									"data.aud = \"https://\"+pm.variables.get(\"public_idp_domain\")+pm.variables.get(\"url_prefix\")+\"identity\";",
+									"data.redirect_uri = pm.variables.get(\"tpp_redirectUri\");",
+									"data.client_id = pm.variables.get(\"tpp_clientId\");",
+									"data.state = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 11);",
+									"data.nonce = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);",
+									"",
+									"data.exp = Date.now() + 600;",
+									"// set environment variables for parameters",
+									"pm.environment.set(\"tpp_exp\", data.exp);",
+									"pm.environment.set(\"tpp_nonce\", data.nonce);",
+									"pm.environment.set(\"tpp_state\", data.state);",
+									"",
+									"// load the private key",
+									"var privateKey = pm.variables.get(\"tpp_privateKey\");",
+									"",
+									"// sign token",
+									"var signedToken = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(data), privateKey);",
+									"",
+									"pm.environment.set(\"signed_jwt\", signedToken);",
+									"console.log(signedToken);",
+									"",
+									"// Clear pf cookie",
+									"pm.environment.set('pf_cookie', '');",
+									"pm.environment.set('login_path', '');",
+									"pm.environment.set('resume_login_path', '');",
+									"pm.environment.set('login_redirect1', '');",
+									"pm.environment.set('samlresponse', '');",
+									"pm.environment.set('samlrequest', '');",
+									"pm.environment.set('relaystate', '');",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "509ab33e-8605-4dc2-9eef-19d0a59a57c4",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"tests[\"X-Frame-Options header is DENY\"] = postman.getResponseHeader(\"X-Frame-Options\") === \"SAMEORIGIN\";",
+									"tests[\"cookie is not undefined\"] = pm.cookies.get('PF_OB_SAML') !== undefined;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('samlurl', $('form[method=post]').prop('action'));",
+									"pm.environment.set('samlrequest', $('input[name=SAMLRequest]').prop('value'));",
+									"pm.environment.set('relaystate', $('input[name=RelayState]').prop('value'));",
+									"pm.environment.set('pf_cookie', pm.cookies.get('PF'));",
+									"pm.environment.set('pf_tracking_cookie', pm.cookies.get('PF_TRACKING'));",
+									"var x=0;",
+									"while (pm.cookies.idx(x) !== undefined) {",
+									"  if (pm.cookies.idx(x).name.startsWith(\"PF_TRACKING-\")) {",
+									"    var trackingCookieName = pm.cookies.idx(x).name;",
+									"    console.log(trackingCookieName);",
+									"    pm.environment.set('pf_tracking_cookie_name', trackingCookieName);",
+									"    pm.environment.set('pf_tracking_cookie_value', pm.cookies.get(trackingCookieName));",
+									"  }",
+									"  x++;",
+									"}",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "text/plain",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "response_type",
+									"value": "{{tpp_responseType}}",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{tpp_au_scopes}}",
+									"type": "text"
+								},
+								{
+									"key": "nonce",
+									"value": "{{tpp_nonce}}",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{tpp_redirectUri}}",
+									"type": "text"
+								},
+								{
+									"key": "request",
+									"value": "{{signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "state",
+									"value": "{{tpp_state}}",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{public_idp_domain}}{{url_prefix}}identity/as/authorization.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{public_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"authorization.oauth2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TPP request SAML",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2cfac842-31c1-416f-a198-bbf60e43f6d1",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('pf_cookie', pm.cookies.get('PF'));",
+									"pm.environment.set('login_path', $('form[method=POST]').prop('action'));",
+									"if (pm.environment.get('login_path') !== undefined && pm.environment.get('login_path') !== \"\") {",
+									"postman.setNextRequest('Submit Login form');",
+									"console.log(\"SAML login required\");",
+									"} else {",
+									"//tests[\"show request\" + JSON.stringify(pm.request)] = true;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('resume_login_path', $('form[method=post]').prop('action'));",
+									"pm.environment.set('samlresponse', $('input[name=SAMLResponse]').prop('value'));",
+									"pm.environment.set('relaystate', $('input[name=RelayState]').prop('value'));",
+									"postman.setNextRequest('Follow login redirect');",
+									"console.log(\"SAML login not required\")",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"description": "http content type",
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "SAMLRequest",
+									"value": "{{samlrequest}}",
+									"type": "text"
+								},
+								{
+									"key": "RelayState",
+									"value": "{{relaystate}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{samlurl}}",
+							"host": [
+								"{{samlurl}}"
+							]
+						},
+						"description": "Exchange authorization code for access token.\nTODO get the authorization code"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Login form",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6d5fdcf6-8f23-4a37-ae10-84db43525e63",
+								"exec": [
+									"if (pm.environment.has('skip_login_url')) {",
+									"tests[\"response code is 404\"] = responseCode.code === 404;",
+									"pm.environment.set('dev0_idp', pm.environment.get('preferred_idp'));",
+									"pm.environment.unset('skip_login_url');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"//tests[\"show request\" + JSON.stringify(pm.request)] = true;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('resume_login_path', $('form[method=post]').prop('action'));",
+									"pm.environment.set('samlresponse', $('input[name=SAMLResponse]').prop('value'));",
+									"pm.environment.set('relaystate', $('input[name=RelayState]').prop('value'));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ea2d540f-8c27-4590-9b44-eda02cb9ae8f",
+								"exec": [
+									"if (pm.environment.get('login_path') !== null) {",
+									"console.log(\"performing SAML login\");",
+									"} else {",
+									"console.log(\"skipping SAML login\");",
+									"pm.environment.set('skip_login_url', pm.environment.get('preferred_idp'));",
+									"pm.environment.set('dev0_idp', 'postman-echo.com/get');",
+									"//postman.setNextRequest('Follow login redirect');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text",
+								"description": "http content type"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "pf.username",
+									"value": "{{saml_user}}",
+									"type": "text"
+								},
+								{
+									"key": "pf.pass",
+									"value": "{{saml_pass}}",
+									"type": "text"
+								},
+								{
+									"key": "pf.ok",
+									"value": "clicked",
+									"type": "text"
+								},
+								{
+									"key": "pf.adapterId",
+									"value": "TestSimpleAdapter",
+									"type": "text"
+								},
+								{
+									"key": "pf.cancel",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "Cookie",
+									"value": "PF={{pf_cookie}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{dev0_idp}}{{login_path}}",
+							"host": [
+								"{{dev0_idp}}{{login_path}}"
+							]
+						},
+						"description": "Exchange authorization code for access token.\nTODO get the authorization code"
+					},
+					"response": []
+				},
+				{
+					"name": "Follow login redirect",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7b540532-1d4a-4421-ad76-dc8db75071b6",
+								"exec": [
+									"tests[\"response code is 302\"] = responseCode.code === 302;",
+									"pm.environment.set('login_redirect1', pm.response.headers.get('Location'));",
+									"/*",
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('login_redirect1', $('form[method=post]').prop('action'));",
+									"pm.environment.set('resumePath', $('input[name=resumePath]').prop('value'));",
+									"pm.environment.set('allowInteraction', $('input[name=allowInteraction]').prop('value'));",
+									"pm.environment.set('reauth', $('input[name=reauth]').prop('value'));",
+									"pm.environment.set('consentId', $('input[name=consentId]').prop('value'));",
+									"*/",
+									"pm.environment.set('cid', pm.response.headers.get('x-appCorrelationId'));",
+									"pm.environment.set('tid', pm.response.headers.get('X-Transaction-Id'));",
+									"pm.environment.set('referer', pm.response.headers.get('Referer'));",
+									"pm.environment.set('pf_cookie', pm.cookies.get('PF'));",
+									"pm.environment.set('pf_tracking_cookie', pm.cookies.get('PF_TRACKING'));",
+									"//console.log('consent id: ' + pm.environment.get('consentId'));",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "text/plain",
+								"description": "http content type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "SAMLResponse",
+									"value": "{{samlresponse}}",
+									"type": "text"
+								},
+								{
+									"key": "RelayState",
+									"value": "{{relaystate}}",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{resume_login_path}}",
+							"host": [
+								"{{resume_login_path}}"
+							]
+						},
+						"description": "Exchange authorization code for access token.\nTODO get the authorization code"
+					},
+					"response": []
+				},
+				{
+					"name": "Follow SAML redirect",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6fbc8556-1eca-4d73-9f70-423fe1c8031f",
+								"exec": [
+									"//var getParamFromQuery = function (key)",
+									"//{",
+									"//    var x = pm.request.url.query;",
+									"//    var newArr = x.filter(function(item){",
+									"//        return item !== null && item.key == key;",
+									"//    });",
+									"//    return newArr[0];",
+									"//};",
+									"//var getValueFromQuery = function (key)",
+									"//{",
+									"//    return getParamFromQuery(key).value;  ",
+									"//};",
+									"if (responseCode.code == 302) { ",
+									"    postman.setNextRequest('Send TPP Payload');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"//pm.environment.set('resumePath', getValueFromQuery(\"resumePath\"));",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('consent_path', $('form[method=post]').prop('action'));",
+									"tests[\"consent path is not empty\"] = pm.environment.get('consent_path') !== \"\";",
+									"pm.environment.set('consent_response', $('input[name=accept]').prop('value'));",
+									"pm.environment.set('resumeBase', $('input[name=resumeBase]').prop('value'));",
+									"pm.environment.set('resumePath', $('input[name=resumePath]').prop('value'));",
+									"pm.environment.set('consentId', $('input[name=consentId]').prop('value'));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "text/plain",
+								"description": "http content type",
+								"type": "text"
+							},
+							{
+								"key": "Referer",
+								"value": "{{referer}}",
+								"type": "text"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Transaction-Id",
+								"value": "{{tid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "consentId",
+									"value": "{{consentId}}",
+									"type": "text"
+								},
+								{
+									"key": "resumePath",
+									"value": "{{resumePath}}",
+									"type": "text"
+								},
+								{
+									"key": "allowInteraction",
+									"value": "{{allowInteraction}}",
+									"type": "text"
+								},
+								{
+									"key": "reauth",
+									"value": "{{reauth}}",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{login_redirect1}}",
+							"host": [
+								"{{login_redirect1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get access token by Consent UI",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "547d031a-6653-418c-a4fd-35df2848d16e",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Token type is bearer\"] = jsonBody.token_type === 'Bearer';",
+									"pm.environment.set('access_token', jsonBody.access_token);",
+									"tests[\"X-Frame-Options header is SAMEORIGIN\"] = postman.getResponseHeader(\"X-Frame-Options\") === \"SAMEORIGIN\";"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{wdpapi_consent_clientid}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{wdpapi_consent_client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{consent_enquiry_scope}} {{consent_maintain_scope}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}identity/as/token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"token.oauth2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consent by Consent UI",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7d9df239-1faa-426d-9e94-2991fd176039",
+								"exec": [
+									"if (responseCode.code == 401) { ",
+									"    postman.setNextRequest('Get access token by Consent UI');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code == 200;",
+									"var jsonData = pm.response.json();",
+									"tests[\"schema listresponse\"] = jsonData.schemas == \"urn:ietf:params:scim:api:messages:2.0:ListResponse\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "27dbe999-282e-4b51-b72f-1d0cb6dd881a",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}scim/v2/Consents?filter=(id eq \"{{consentId}}\")",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}scim"
+							],
+							"path": [
+								"v2",
+								"Consents"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "(id eq \"{{consentId}}\")"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Consent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "090a2c88-3660-4686-96a3-8722b671180c",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"const $ = cheerio.load(responseBody);",
+									"pm.environment.set('return_path', $('form[method=post]').prop('action'));",
+									"tests[\"return path is not empty\"] = pm.environment.get('return_path') !== \"\";",
+									"pm.environment.set('resumePath', $('input[name=resumePath]').prop('value'));",
+									"console.log(pm.environment.get('return_path'))"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "text/plain",
+								"description": "http content type",
+								"type": "text"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Transaction-Id",
+								"value": "{{tid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "consent",
+									"value": "accept",
+									"type": "text"
+								},
+								{
+									"key": "continue",
+									"value": "mock",
+									"type": "text"
+								},
+								{
+									"key": "consentId",
+									"value": "{{consentId}}",
+									"type": "text"
+								},
+								{
+									"key": "resumePath",
+									"value": "{{resumePath}}",
+									"type": "text"
+								},
+								{
+									"key": "resumeBase",
+									"value": "{{resumeBase}}",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "text"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{consent_path}}",
+							"host": [
+								"{{consent_path}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Follow Resume redirect",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5138b3b6-4951-4091-8b17-1fe986e06717",
+								"exec": [
+									"if (responseCode.code != 302) { ",
+									"    postman.setNextRequest('Send TPP Payload');",
+									"} else {",
+									"tests[\"response code is 302\"] = responseCode.code === 302;",
+									"var lo=pm.response.headers.get('Location');",
+									"if (lo == null || lo.includes('error')) {",
+									"postman.setNextRequest('Send TPP Payload');",
+									"} else {",
+									"pm.environment.set('tpp_code', lo.match(\"code=([^&]*)\")[0].match(\"[^=]+$\"));",
+									"tests[\"code is not empty\"] = pm.environment.get('tpp_code') !== \"\";",
+									"pm.environment.set('tpp_id_token', lo.match(\"id_token=([^&]*)\")[0].match(\"[^=]+$\"));",
+									"tests[\"id token is not empty\"] = pm.environment.get('tpp_id_token') !== \"\";",
+									"}}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text",
+								"description": "http content type"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}};PF_TRACKING={{pf_tracking_cookie}};PF_TRACKING={{pf_tracking_cookie}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Transaction-Id",
+								"value": "{{tid}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{return_path}}",
+							"host": [
+								"{{return_path}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Access Token from Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "32e085fa-e32e-4c00-8569-0d87c5b1c79e",
+								"exec": [
+									"var jsonBody = pm.response.json();",
+									"if (responseCode.code == 400) {",
+									"postman.setNextRequest(\"Send TPP Payload\");",
+									"} else {pm.environment.set(\"tpp_access_token\",jsonBody.access_token);",
+									"pm.environment.set(\"tpp_refresh_token\",jsonBody.refresh_token);",
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"tests[\"Token type is bearer\"] = jsonBody.token_type === 'Bearer';",
+									"tests[\"X-Frame-Options header is SAMEORIGIN\"] = postman.getResponseHeader(\"X-Frame-Options\") === \"SAMEORIGIN\";",
+									"tests[\"Arrangement id is presented\"] = jsonBody.cdr_arrangement_id != undefined && jsonBody.cdr_arrangement_id.startsWith(\"3603\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "088e1fa1-3ca8-40ee-8341-18c34b7fe5be",
+								"exec": [
+									"/* loading of the jsrsasign library into Postman Sandbox */",
+									"var navigator = {}; //fake a navigator object for the lib",
+									"var window = {}; //fake a window object for the lib",
+									"eval(pm.environment.get(\"jsrsasign-js\")); //import javascript jsrsasign",
+									"",
+									"var currentTime = +new Date(); // the current time in milliseconds",
+									"var issuedAtTimeSeconds = currentTime/1000;",
+									"var expirationTimeSeconds = currentTime/1000 + 3600;",
+									"",
+									"// define jwt header",
+									"var header = {",
+									"\t\"typ\": \"JWT\",",
+									"\t\"alg\": \"PS256\"",
+									"};",
+									"header.kid = pm.variables.get(\"tpp_kid\");",
+									"",
+									"// add variable data to payload",
+									"data.iss = pm.variables.get(\"tpp_clientId\");",
+									"data.sub = pm.variables.get(\"tpp_clientId\");",
+									"data.iat = issuedAtTimeSeconds;",
+									"data.exp = expirationTimeSeconds;",
+									"data.aud = \"https://\"+pm.variables.get(\"cdr_idp_domain\")+pm.variables.get(\"url_prefix\")+\"identity/as/token.oauth2\";",
+									"data.jti = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);",
+									"",
+									"// load the private key",
+									"var privateKey = pm.variables.get(\"tpp_privateKey\");",
+									"",
+									"// sign token",
+									"var signedToken = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(data), privateKey);",
+									"pm.environment.set(\"signed_jwt\", signedToken);",
+									"",
+									"console.log(signedToken);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "{{tpp_code}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{tpp_redirectUri}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{cdr_idp_domain}}{{url_prefix}}identity/as/token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{cdr_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"token.oauth2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get access token for Arrangement Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7bd9726b-d1e3-42b9-8a02-56239fc102d8",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Token type is bearer\"] = jsonBody.token_type === 'Bearer';",
+									"pm.environment.set('access_token', jsonBody.access_token);",
+									"tests[\"X-Frame-Options header is SAMEORIGIN\"] = postman.getResponseHeader(\"X-Frame-Options\") === \"SAMEORIGIN\";"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{wdpapi_consent_clientid}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{wdpapi_consent_client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{consent_enquiry_scope}} {{consent_maintain_scope}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}identity/as/token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"token.oauth2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consent for Arrangement Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a87a2caf-b2de-4448-a2a6-f7f00d4d2148",
+								"exec": [
+									"if (responseCode.code == 401) { ",
+									"    postman.setNextRequest('Get access token for Arrangement Check');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code == 200;",
+									"var jsonData = pm.response.json();",
+									"tests[\"schema listresponse\"] = jsonData.schemas == \"urn:ietf:params:scim:api:messages:2.0:ListResponse\";",
+									"tests[\"totalResults should be 1\"] = jsonData.totalResults == 1;",
+									"tests[\"Consent State should be active\"] = jsonData.Resources[0].state == \"active\";",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "01507575-60ca-420f-ba19-52fe702a431e",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"value": "{{cid}}",
+								"type": "text"
+							},
+							{
+								"key": "Cookie",
+								"value": "PF={{pf_cookie}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}scim/v2/Consents?filter=(id eq \"{{consentId}}\")",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}scim"
+							],
+							"path": [
+								"v2",
+								"Consents"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "(id eq \"{{consentId}}\")"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "3e12b0ee-175b-4312-9515-c454a7c693c3",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "28de39aa-2d59-42a4-a0e5-d4ee8283b13f",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Positive",
+			"item": [
+				{
+					"name": "Introspect the Refresh Token - Before Delete",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "fccc7c28-ae08-48c3-b3a0-9ccb2eb9d31f",
+								"exec": [
+									"/* loading of the jsrsasign library into Postman Sandbox */",
+									"var navigator = {}; //fake a navigator object for the lib",
+									"var window = {}; //fake a window object for the lib",
+									"eval(pm.environment.get(\"jsrsasign-js\")); //import javascript jsrsasign",
+									"",
+									"var currentTime = +new Date(); // the current time in milliseconds",
+									"var issuedAtTimeSeconds = currentTime/1000;",
+									"var expirationTimeSeconds = currentTime/1000 + 3600;",
+									"",
+									"// define jwt header",
+									"var header = {",
+									"\t\"typ\": \"JWT\",",
+									"\t\"alg\": \"PS256\"",
+									"};",
+									"header.kid = pm.variables.get(\"tpp_kid\");",
+									"",
+									"// add variable data to payload",
+									"data.iss = pm.variables.get(\"tpp_clientId\");",
+									"data.sub = pm.variables.get(\"tpp_clientId\");",
+									"data.iat = issuedAtTimeSeconds;",
+									"data.exp = expirationTimeSeconds;",
+									"data.aud = \"https://\"+pm.variables.get(\"cdr_idp_domain\")+pm.variables.get(\"url_prefix\")+\"identity/as/introspect.oauth2\";",
+									"data.jti = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);",
+									"",
+									"// load the private key",
+									"var privateKey = pm.variables.get(\"tpp_privateKey\");",
+									"",
+									"// sign token",
+									"var signedToken = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(data), privateKey);",
+									"pm.environment.set(\"signed_jwt\", signedToken);",
+									"",
+									"console.log(signedToken);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "250906dc-636b-44af-87b8-b86b6c2f5818",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"//Test the token is currently active",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Refresh Token is active\"] = jsonBody.active === true;",
+									"tests[\"Arrangement id is presented\"] = jsonBody.cdr_arrangement_id != undefined && jsonBody.cdr_arrangement_id.startsWith(\"3603\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{tpp_refresh_token}}",
+									"type": "text"
+								},
+								{
+									"key": "token_type_hint",
+									"value": "refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{cdr_idp_domain}}{{url_prefix}}identity/as/introspect.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{cdr_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"introspect.oauth2"
+							]
+						},
+						"description": "Introspect the tpp refresh token and validate it is active before revocation."
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ec9e9ee6-d80f-4c54-9823-78308b7d89fd",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "99bd9501-6a0a-4299-8cde-2fd765c7b9b8",
+								"exec": [
+									"/* loading of the jsrsasign library into Postman Sandbox */",
+									"var navigator = {}; //fake a navigator object for the lib",
+									"var window = {}; //fake a window object for the lib",
+									"eval(pm.environment.get(\"jsrsasign-js\")); //import javascript jsrsasign",
+									"",
+									"var currentTime = +new Date(); // the current time in milliseconds",
+									"var issuedAtTimeSeconds = currentTime/1000;",
+									"var expirationTimeSeconds = currentTime/1000 + 3600;",
+									"",
+									"// define jwt header",
+									"var header = {",
+									"\t\"typ\": \"JWT\",",
+									"\t\"alg\": \"PS256\"",
+									"};",
+									"header.kid = pm.variables.get(\"tpp_kid\");",
+									"",
+									"// add variable data to payload",
+									"data.iss = pm.variables.get(\"tpp_clientId\");",
+									"data.sub = pm.variables.get(\"tpp_clientId\");",
+									"data.iat = issuedAtTimeSeconds;",
+									"data.exp = expirationTimeSeconds;",
+									"data.aud = \"https://\"+pm.variables.get(\"cdr_idp_domain\")+pm.variables.get(\"url_prefix\")+\"identity/as/token.oauth2\";",
+									"data.jti = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);",
+									"",
+									"// load the private key",
+									"var privateKey = pm.variables.get(\"tpp_privateKey\");",
+									"",
+									"// sign token",
+									"var signedToken = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(data), privateKey);",
+									"pm.environment.set(\"signed_jwt\", signedToken);",
+									"",
+									"console.log(signedToken);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "X-Target-Stack",
+								"type": "text",
+								"value": "{{target_stack}}"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-XSRF-Header",
+								"type": "text",
+								"value": "PingFederate"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{tpp_refresh_token}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{cdr_idp_domain}}{{url_prefix}}identity/as/revoke_token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{cdr_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"revoke_token.oauth2"
+							]
+						},
+						"description": "Call Revocation endpoint using the generated refresh token and validate successful response."
+					},
+					"response": []
+				},
+				{
+					"name": "Introspect the Refresh Token - After Delete",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b045dc2b-ae79-403a-9215-7f0f1d5ca0ad",
+								"exec": [
+									"/* loading of the jsrsasign library into Postman Sandbox */",
+									"var navigator = {}; //fake a navigator object for the lib",
+									"var window = {}; //fake a window object for the lib",
+									"eval(pm.environment.get(\"jsrsasign-js\")); //import javascript jsrsasign",
+									"",
+									"var currentTime = +new Date(); // the current time in milliseconds",
+									"var issuedAtTimeSeconds = currentTime/1000;",
+									"var expirationTimeSeconds = currentTime/1000 + 3600;",
+									"",
+									"// define jwt header",
+									"var header = {",
+									"\t\"typ\": \"JWT\",",
+									"\t\"alg\": \"PS256\"",
+									"};",
+									"header.kid = pm.variables.get(\"tpp_kid\");",
+									"",
+									"// add variable data to payload",
+									"data.iss = pm.variables.get(\"tpp_clientId\");",
+									"data.sub = pm.variables.get(\"tpp_clientId\");",
+									"data.iat = issuedAtTimeSeconds;",
+									"data.exp = expirationTimeSeconds;",
+									"data.aud = \"https://\"+pm.variables.get(\"cdr_idp_domain\")+pm.variables.get(\"url_prefix\")+\"identity/as/introspect.oauth2\";",
+									"data.jti = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);",
+									"",
+									"// load the private key",
+									"var privateKey = pm.variables.get(\"tpp_privateKey\");",
+									"",
+									"// sign token",
+									"var signedToken = KJUR.jws.JWS.sign(header.alg, JSON.stringify(header), JSON.stringify(data), privateKey);",
+									"pm.environment.set(\"signed_jwt\", signedToken);",
+									"",
+									"console.log(signedToken);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "5ed1982b-a7a5-49b1-bb77-94723de03b1e",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"//Test the token is currently active",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Refresh Token is inactive\"] = jsonBody.active === false;",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "{{tpp_refresh_token}}",
+									"type": "text"
+								},
+								{
+									"key": "token_type_hint",
+									"value": "refresh_token",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{cdr_idp_domain}}{{url_prefix}}identity/as/introspect.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{cdr_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"introspect.oauth2"
+							]
+						},
+						"description": "Introspect the tpp refresh token and validate it is inactive after revocation."
+					},
+					"response": []
+				},
+				{
+					"name": "Get access token for Consent Lookup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "860f7525-8812-44ca-83a1-f0869f406de6",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Token type is bearer\"] = jsonBody.token_type === 'Bearer';",
+									"pm.environment.set('access_token', jsonBody.access_token);",
+									"tests[\"X-Frame-Options header is SAMEORIGIN\"] = postman.getResponseHeader(\"X-Frame-Options\") === \"SAMEORIGIN\";"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{wdpapi_consent_clientid}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{wdpapi_consent_client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{consent_enquiry_scope}} {{consent_maintain_scope}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}identity/as/token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"token.oauth2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consent After Revocation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b6613db9-f2d1-434a-b9be-2da668445f0f",
+								"exec": [
+									"if (responseCode.code == 401) { ",
+									"    postman.setNextRequest('Get access token for Consent Lookup');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code == 200;",
+									"var jsonData = pm.response.json();",
+									"tests[\"Consent Status is revoked\"] =  jsonData.Resources[0].state === \"revoked\"",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "40d6c9c6-abe7-41a7-9574-bd8b327f80eb",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "x-appCorrelationId",
+								"type": "text",
+								"value": "{{cid}}"
+							},
+							{
+								"key": "Cookie",
+								"type": "text",
+								"value": "PF={{pf_cookie}}"
+							}
+						],
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}scim/v2/Consents?filter=(id eq \"{{consentId}}\")",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}scim"
+							],
+							"path": [
+								"v2",
+								"Consents"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "(id eq \"{{consentId}}\")"
+								}
+							]
+						},
+						"description": "This test validates that Consent status is changed to 'revoked' after Consent is revoked via WBC Dashboard"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Access Token for ConsentRT Lookup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f4e6ffb8-675f-4e5d-8190-514287fb8534",
+								"exec": [
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"var jsonBody = pm.response.json();",
+									"tests[\"Token type is bearer\"] = jsonBody.token_type === 'Bearer';",
+									"pm.environment.set('access_token_consentrt_read', jsonBody.access_token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{wdpapi_consent_rt_clientid}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{wdpapi_consent_rt_client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{consentrt_read_scope}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}identity/as/token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"token.oauth2"
+							]
+						},
+						"description": "This test gets an access token for accessing ConsentRT REST API."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Consent RT After Revocation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f4c33a0c-c6e0-4cfa-acd9-ee54f70c8721",
+								"exec": [
+									"if (responseCode.code > 400) { ",
+									"    postman.setNextRequest('Get Access Token for ConsentRT Lookup');",
+									"} else {",
+									"tests[\"response code is 200\"] = responseCode.code === 200;",
+									"var jsonData = pm.response.json();",
+									"",
+									"tests[\"Refresh Token equals to Original Refresh Token\"] = jsonData.refreshToken === pm.environment.get(\"tpp_refresh_token\");",
+									"tests[\"Refresh Token Status is revoked\"] = jsonData.refreshTokenStatus === 'revoked';",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "485a37e4-c74c-4f42-8948-10e10a629153",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token_consentrt_read}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "https://{{extranet_domain}}{{url_prefix}}consentrt/v1/{{consentId}}",
+							"protocol": "https",
+							"host": [
+								"{{extranet_domain}}{{url_prefix}}consentrt"
+							],
+							"path": [
+								"v1",
+								"{{consentId}}"
+							]
+						},
+						"description": "This test validates that ConsentRT object can be retrieved and ConsentRT status is changed to 'revoked' after Consent is revoked via WBC Dashboard"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Negative",
+			"item": [
+				{
+					"name": "Revoke Refresh Token With Wrong Creds",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c26a65cd-5beb-4318-82f2-95d03798298d",
+								"exec": [
+									"tests[\"response code is 401\"] = responseCode.code === 401;",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "9b25bf1d-9770-4f0e-8e84-80ee2f68b280",
+								"exec": [
+									"// Create a dummy jwt token to use for authentication of the client",
+									"// Defining our token parts",
+									"var header = {",
+									"  \"alg\": \"HS256\",",
+									"  \"typ\": \"JWT\"",
+									"};",
+									"",
+									"var data = {",
+									"  \"id\": 1,",
+									"  \"username\": \"some user\"",
+									"};",
+									"",
+									"var secret = \"My very confidential secret!!!\";",
+									"",
+									"function base64url(source) {",
+									"  // Encode in classical base64",
+									"  encodedSource = CryptoJS.enc.Base64.stringify(source);",
+									"  ",
+									"  // Remove padding equal characters",
+									"  encodedSource = encodedSource.replace(/=+$/, '');",
+									"  ",
+									"  // Replace characters according to base64url specifications",
+									"  encodedSource = encodedSource.replace(/\\+/g, '-');",
+									"  encodedSource = encodedSource.replace(/\\//g, '_');",
+									"  ",
+									"  return encodedSource;",
+									"}",
+									"",
+									"var stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header));",
+									"var encodedHeader = base64url(stringifiedHeader);",
+									"",
+									"var stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(data));",
+									"var encodedData = base64url(stringifiedData);",
+									"",
+									"var signature = encodedHeader + \".\" + encodedData;",
+									"signature = CryptoJS.HmacSHA256(signature, secret);",
+									"signature = base64url(signature);",
+									"",
+									"pm.environment.set(\"corruped_signed_jwt\", encodedHeader+\".\"+encodedData+\".\"+signature);",
+									"",
+									"console.log(pm.environment.get(\"corruped_signed_jwt\"));",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/x-www-form-urlencoded"
+							},
+							{
+								"key": "X-Target-Stack",
+								"type": "text",
+								"value": "{{target_stack}}"
+							},
+							{
+								"key": "Accept",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "X-XSRF-Header",
+								"type": "text",
+								"value": "PingFederate"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{tpp_clientId}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion",
+									"value": "{{corruped_signed_jwt}}",
+									"type": "text"
+								},
+								{
+									"key": "client_assertion_type",
+									"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{tpp_refresh_token}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{cdr_idp_domain}}{{url_prefix}}identity/as/revoke_token.oauth2",
+							"protocol": "https",
+							"host": [
+								"{{cdr_idp_domain}}{{url_prefix}}identity"
+							],
+							"path": [
+								"as",
+								"revoke_token.oauth2"
+							]
+						},
+						"description": "Call Revocation Endpoint with wrong credentials"
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "e141f927-aae8-4c50-8ab4-ad9f66c59b4b",
+				"type": "text/javascript",
+				"exec": [
+					"// Inject the target stack header at collection level",
+					"// in order to direct the traffic to either the active or inactive stack",
+					"pm.request.headers.add({",
+					"\t   'key': \"X-Target-Stack\",",
+					"\t    'value': \"{{target_stack}}\"",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "47bdc498-5cc3-4b50-8aeb-142ba32bcb1e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

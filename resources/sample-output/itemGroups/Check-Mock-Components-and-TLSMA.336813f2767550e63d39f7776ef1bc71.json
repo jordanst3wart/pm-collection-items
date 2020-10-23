@@ -1,0 +1,27 @@
+{
+  "name": "Check Mock Components and TLSMA",
+  "item": [
+    "resources/sample-output/items/Conditionally-skip-tests.cfc80d6421fccc73db346d27c324c6bd.json"
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {}
+}

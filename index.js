@@ -55,6 +55,7 @@ function breakdownCollection(collectionPath, outputPath) {
         member["items"]["members"].forEach((item => {
             var itemWithoutIds = removeKeys(item.toJSON(), ["id"]);
             var hash = helpers.generateHash(itemWithoutIds);
+            // TODO might not need to replace things with a '-'
             name = outputPath + '/items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
             ensureDirectory(outputPath +'/items');
             fs.writeFileSync(name, JSON.stringify(itemWithoutIds, null, 2));
@@ -159,7 +160,6 @@ if(inputFiles.length === 0){
 
 // TODO ensure no trailing "/" in paths
 if(args["breakdownCollection"]){
-    console.log(inputFiles);
     inputFiles.map(path => {
         pathBreakdown.push(breakdownCollection(path, args["outputDir"]));
     })

@@ -1,20 +1,32 @@
 {
-  "info": {
-    "_postman_id": "029c5a1a-d349-4b96-88ae-dcfbf619c51a",
-    "name": "Restful_Booker_Collection",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
   "item": [
     {
       "name": "Health Check",
       "item": [
         {
           "name": "Ping the API",
+          "request": {
+            "url": {
+              "path": [
+                "ping"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "id": "d4523c60-a2fc-416a-a1d5-f6516721f2c7",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201))",
@@ -26,7 +38,6 @@
             {
               "listen": "prerequest",
               "script": {
-                "id": "945042dc-1d26-4f1d-8505-61d928416bac",
                 "type": "text/javascript",
                 "exec": [
                   "",
@@ -35,91 +46,55 @@
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/ping",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "ping"
-              ]
-            }
-          },
-          "response": []
+          ]
         }
-      ]
+      ],
+      "event": []
     },
     {
       "name": "Get all Bookings",
       "item": [
         {
           "name": "Get all bookings",
+          "request": {
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "id": "1d436a72-c0cc-4fee-9f43-bd017d0d373f",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ]
-            }
-          },
-          "response": []
+          ]
         },
         {
           "name": "Get all bookings with all parameters",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
-                ]
-              }
-            }
-          ],
           "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseURL}}/booking?firstname=sally&lastname=brown&checkin=2017-11-11&checkout=2017-11-15",
-              "host": [
-                "{{baseURL}}"
-              ],
               "path": [
                 "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
               ],
               "query": [
                 {
@@ -138,13 +113,16 @@
                   "key": "checkout",
                   "value": "2017-11-15"
                 }
-              ]
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
             }
           },
-          "response": []
-        },
-        {
-          "name": "Get all bookings with the firstname and last name parameter",
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -155,21 +133,17 @@
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Get all bookings with the firstname and last name parameter",
           "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseURL}}/booking?firstname=sally&lastname=brown",
-              "host": [
-                "{{baseURL}}"
-              ],
               "path": [
                 "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
               ],
               "query": [
                 {
@@ -180,18 +154,57 @@
                   "key": "lastname",
                   "value": "brown"
                 }
-              ]
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
             }
           },
-          "response": []
-        },
-        {
-          "name": "Get all bookings with the firstname  parameter",
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
-                "id": "e9268b31-7153-4d71-afec-55bdd4da3716",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get all bookings with the firstname  parameter",
+          "request": {
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [
+                {
+                  "key": "firstname",
+                  "value": "sally"
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
@@ -199,72 +212,33 @@
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking?firstname=sally",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ],
-              "query": [
-                {
-                  "key": "firstname",
-                  "value": "sally"
-                }
-              ]
-            }
-          },
-          "response": []
+          ]
         },
         {
           "name": "Get all bookings with the lastname parameter",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
-                ]
-              }
-            }
-          ],
           "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseURL}}/booking?lastname=brown",
-              "host": [
-                "{{baseURL}}"
-              ],
               "path": [
                 "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
               ],
               "query": [
                 {
                   "key": "lastname",
                   "value": "brown"
                 }
-              ]
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
             }
           },
-          "response": []
-        },
-        {
-          "name": "Get all bookings with the checkin parameter",
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -275,34 +249,33 @@
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Get all bookings with the checkin parameter",
           "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseURL}}/booking?checkin=2017-11-11",
-              "host": [
-                "{{baseURL}}"
-              ],
               "path": [
                 "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
               ],
               "query": [
                 {
                   "key": "checkin",
                   "value": "2017-11-11"
                 }
-              ]
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
             }
           },
-          "response": []
-        },
-        {
-          "name": "Get all bookings with the checkout parameter",
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -313,39 +286,78 @@
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Get all bookings with the checkout parameter",
           "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseURL}}/booking?checkout=2017-11-11",
-              "host": [
-                "{{baseURL}}"
-              ],
               "path": [
                 "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
               ],
               "query": [
                 {
                   "key": "checkout",
                   "value": "2017-11-11"
                 }
-              ]
+              ],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+                ]
+              }
+            }
+          ]
         }
-      ]
+      ],
+      "event": []
     },
     {
       "name": "Get a single booking",
       "item": [
         {
           "name": "Get a single booking",
+          "request": {
+            "url": {
+              "path": [
+                "booking",
+                "1"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -358,34 +370,35 @@
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking/1",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking",
-                "1"
-              ]
-            }
-          },
-          "response": []
+          ]
         },
         {
           "name": "Get a single booking with XML header set",
+          "request": {
+            "url": {
+              "path": [
+                "booking",
+                "1"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/xml"
+              }
+            ],
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -396,39 +409,33 @@
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/xml"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking/1",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking",
-                "1"
-              ]
-            }
-          },
-          "response": []
+          ]
         },
         {
           "name": "Get a single booking dynamically",
+          "request": {
+            "url": {
+              "path": [
+                "booking",
+                "{{booking_id}}"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "prerequest",
               "script": {
-                "id": "87aa1fc1-66cf-4596-bb6e-ec84494274bd",
                 "type": "text/javascript",
                 "exec": [
                   "pm.environment.set(\"booking_id\", _.random(1,10))"
@@ -438,7 +445,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "7f1529fa-a58b-4d9b-a8b1-651483fa26e8",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
@@ -449,33 +455,13 @@
                 ]
               }
             }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking/{{booking_id}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking",
-                "{{booking_id}}"
-              ]
-            }
-          },
-          "response": []
+          ]
         }
       ],
       "event": [
         {
           "listen": "prerequest",
           "script": {
-            "id": "bed71d80-d8ce-4cdb-8a88-29bf0e78c8d4",
             "type": "text/javascript",
             "exec": [
               ""
@@ -485,7 +471,6 @@
         {
           "listen": "test",
           "script": {
-            "id": "44406529-93e1-4cb2-9f9f-68d1caa5cc9e",
             "type": "text/javascript",
             "exec": [
               "if(pm.response.to.have.header('Content-Type') === 'application/json; charset=utf-8') {",
@@ -517,61 +502,34 @@
       "item": [
         {
           "name": "Create a new booking with JSON",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "id": "eeb0b51e-2c47-4271-8399-7fd1cd934d72",
-                "type": "text/javascript",
-                "exec": [
-                  ""
-                ]
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "id": "748f8788-42bc-4765-a013-0795b357b67b",
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
-                  "",
-                  ""
-                ]
-              }
-            }
-          ],
           "request": {
-            "method": "POST",
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "method": "POST",
             "body": {
               "mode": "raw",
               "raw": "{\r\n  \"firstname\" : \"Sally\",\r\n\t\"lastname\" : \"Brown\",\r\n\t\"totalprice\" : 111,\r\n\t\"depositpaid\" : true,\r\n\t\"additionalneeds\" : \"Breakfast\",\r\n\t\"bookingdates\" : {\r\n\t\t\"checkin\" : \"2013-02-23\",\r\n\t\t\"checkout\" : \"2014-10-23\"\r\n\t}\r\n}"
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ]
             }
           },
-          "response": []
-        },
-        {
-          "name": "Create a new booking with XML",
+          "response": [],
           "event": [
             {
               "listen": "prerequest",
               "script": {
-                "id": "eeb0b51e-2c47-4271-8399-7fd1cd934d72",
                 "type": "text/javascript",
                 "exec": [
                   ""
@@ -581,17 +539,29 @@
             {
               "listen": "test",
               "script": {
-                "id": "43617033-fef8-4fae-9cef-6ddbcf0260d6",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
+                  "",
                   ""
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Create a new booking with XML",
           "request": {
-            "method": "POST",
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
             "header": [
               {
                 "key": "Content-Type",
@@ -602,103 +572,65 @@
                 "value": "application/xml"
               }
             ],
+            "method": "POST",
             "body": {
               "mode": "raw",
               "raw": "<booking>\r\n    <firstname>Sally</firstname>\r\n    <lastname>Brown</lastname>\r\n    <totalprice>111</totalprice>\r\n    <depositpaid>true</depositpaid>\r\n    <additionalneeds>Breakfast</additionalneeds>\r\n    <bookingdates>\r\n        <checkin>2013/02/23</checkin>\r\n        <checkout>2014/10/23</checkout>\r\n    </bookingdates>\r\n</booking>"
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ]
             }
           },
-          "response": []
-        },
-        {
-          "name": "Dynamically create a new booking with JSON",
+          "response": [],
           "event": [
             {
               "listen": "prerequest",
               "script": {
-                "id": "f4db6ba1-d350-4d89-a62b-97543a0886df",
                 "type": "text/javascript",
                 "exec": [
-                  "pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
-                  "    var firstname = res.json().results[0].name.first",
-                  "    var lastname  = res.json().results[0].name.last",
-                  "    pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
-                  "    pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
-                  "})",
-                  "",
-                  "pm.environment.set(\"total_price\", _.random(0, 1000))",
-                  "",
-                  "const depositPaid = [true, false]",
-                  "pm.environment.set(\"depositPaid\", _.shuffle(depositPaid)[0])",
-                  "",
-                  "const moment = require('moment')",
-                  "pm.environment.set(\"check_in\", JSON.stringify(moment().format('YYYY-MM-DD')))",
-                  "pm.environment.set(\"check_out\", JSON.stringify(moment().add(_.random(1, 14), 'days').format('YYYY-MM-DD')))",
-                  "",
-                  "const items = [\"None\", \"Breakfast\", \"Lunch\", \"Dinner\", \"Late Checkout\", \"Newspaper\", \"Extra Pillow\"]",
-                  "pm.environment.set(\"additional_needs\", JSON.stringify(_.shuffle(items)[0]))"
+                  ""
                 ]
               }
             },
             {
               "listen": "test",
               "script": {
-                "id": "34a00c54-ce1d-4a19-9ff4-59ffc06f5e39",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
-                  "",
-                  "function cleanup() {",
-                  "    const clean = ['first_name', 'last_name', 'total_price', 'depositPaid', 'check_in', 'check_out', 'additional_needs']",
-                  "    for(let i = 0; i < clean.length; ++i){",
-                  "        pm.environment.unset(clean[i])",
-                  "    }",
-                  "}",
-                  "cleanup()",
                   ""
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Dynamically create a new booking with JSON",
           "request": {
-            "method": "POST",
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "method": "POST",
             "body": {
               "mode": "raw",
               "raw": "{\r\n\t\"firstname\" : {{first_name}},\r\n\t\"lastname\" : {{last_name}},\r\n\t\"totalprice\" : {{total_price}},\r\n\t\"depositpaid\" : {{depositPaid}},\r\n\t\"additionalneeds\" : {{additional_needs}},\r\n\t\"bookingdates\" : {\r\n\t\t\"checkin\" : {{check_in}},\r\n\t\t\"checkout\" : {{check_out}}\r\n\t}\r\n}"
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ]
             }
           },
-          "response": []
-        },
-        {
-          "name": "Dynamically create a new booking with XML",
+          "response": [],
           "event": [
             {
               "listen": "prerequest",
               "script": {
-                "id": "f4db6ba1-d350-4d89-a62b-97543a0886df",
                 "type": "text/javascript",
                 "exec": [
                   "pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
@@ -725,7 +657,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "34a00c54-ce1d-4a19-9ff4-59ffc06f5e39",
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
@@ -741,9 +672,21 @@
                 ]
               }
             }
-          ],
+          ]
+        },
+        {
+          "name": "Dynamically create a new booking with XML",
           "request": {
-            "method": "POST",
+            "url": {
+              "path": [
+                "booking"
+              ],
+              "host": [
+                "{{baseURL}}"
+              ],
+              "query": [],
+              "variable": []
+            },
             "header": [
               {
                 "key": "Content-Type",
@@ -754,30 +697,68 @@
                 "value": "application/xml"
               }
             ],
+            "method": "POST",
             "body": {
               "mode": "raw",
               "raw": "<booking>\r\n    <firstname>{{first_name}}</firstname>\r\n    <lastname>{{last_name}}</lastname>\r\n    <totalprice>{{total_price}}</totalprice>\r\n    <depositpaid>{{depositPaid}}</depositpaid>\r\n    <additionalneeds>{{additional_needs}}</additionalneeds>\r\n    <bookingdates>\r\n        <checkin>{{check_in}}</checkin>\r\n        <checkout>{{check_out}}</checkout>\r\n    </bookingdates>\r\n</booking>"
-            },
-            "url": {
-              "raw": "{{baseURL}}/booking",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "booking"
-              ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
+                  "    var firstname = res.json().results[0].name.first",
+                  "    var lastname  = res.json().results[0].name.last",
+                  "    pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
+                  "    pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
+                  "})",
+                  "",
+                  "pm.environment.set(\"total_price\", _.random(0, 1000))",
+                  "",
+                  "const depositPaid = [true, false]",
+                  "pm.environment.set(\"depositPaid\", _.shuffle(depositPaid)[0])",
+                  "",
+                  "const moment = require('moment')",
+                  "pm.environment.set(\"check_in\", JSON.stringify(moment().format('YYYY-MM-DD')))",
+                  "pm.environment.set(\"check_out\", JSON.stringify(moment().add(_.random(1, 14), 'days').format('YYYY-MM-DD')))",
+                  "",
+                  "const items = [\"None\", \"Breakfast\", \"Lunch\", \"Dinner\", \"Late Checkout\", \"Newspaper\", \"Extra Pillow\"]",
+                  "pm.environment.set(\"additional_needs\", JSON.stringify(_.shuffle(items)[0]))"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
+                  "",
+                  "function cleanup() {",
+                  "    const clean = ['first_name', 'last_name', 'total_price', 'depositPaid', 'check_in', 'check_out', 'additional_needs']",
+                  "    for(let i = 0; i < clean.length; ++i){",
+                  "        pm.environment.unset(clean[i])",
+                  "    }",
+                  "}",
+                  "cleanup()",
+                  ""
+                ]
+              }
+            }
+          ]
         }
-      ]
+      ],
+      "event": []
     }
   ],
   "event": [
     {
       "listen": "prerequest",
       "script": {
-        "id": "dc3d0ab5-1b11-4abe-b203-7240dc6b3fd7",
         "type": "text/javascript",
         "exec": [
           ""
@@ -787,12 +768,16 @@
     {
       "listen": "test",
       "script": {
-        "id": "3dfdde3a-f257-4fde-8b54-9301f0e4f6c8",
         "type": "text/javascript",
         "exec": [
           ""
         ]
       }
     }
-  ]
+  ],
+  "variable": [],
+  "info": {
+    "name": "Restful_Booker_Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
 }

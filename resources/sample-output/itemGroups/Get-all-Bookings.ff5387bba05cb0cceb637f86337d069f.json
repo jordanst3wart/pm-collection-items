@@ -1,0 +1,13 @@
+{
+  "name": "Get all Bookings",
+  "item": [
+    "resources/sample-output/items/Get-all-bookings.ab05d9928ede2ea683dea9f6970e3eda.json",
+    "resources/sample-output/items/Get-all-bookings-with-all-parameters.8714543008af296bdd2bc56d862f3f20.json",
+    "resources/sample-output/items/Get-all-bookings-with-the-firstname-and-last-name-parameter.41d2c830c446d7c9af990c78fdb69a2d.json",
+    "resources/sample-output/items/Get-all-bookings-with-the-firstname--parameter.9d41003609e13c9817236fc9ca70f011.json",
+    "resources/sample-output/items/Get-all-bookings-with-the-lastname-parameter.7fe993f0cb7ede8ffcc484f89e7c8446.json",
+    "resources/sample-output/items/Get-all-bookings-with-the-checkin-parameter.d86b2ef51da1e9c22b0f8e5acfefa5e7.json",
+    "resources/sample-output/items/Get-all-bookings-with-the-checkout-parameter.c55aa8fa1c5521a371d9f9052c1361d9.json"
+  ],
+  "event": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Negative",
+  "item": [
+    "resources/sample-output/items/Revoke-Refresh-Token-With-Wrong-Creds.89d65bb1f57c1afeba208eb63156ea07.json"
+  ],
+  "event": [],
+  "protocolProfileBehavior": {}
+}

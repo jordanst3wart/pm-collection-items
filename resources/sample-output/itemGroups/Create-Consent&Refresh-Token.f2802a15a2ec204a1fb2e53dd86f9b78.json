@@ -1,0 +1,38 @@
+{
+  "name": "Create Consent&Refresh Token",
+  "item": [
+    "resources/sample-output/items/Send-TPP-Payload.d462f83312fdff7b8383836ef9bfb59d.json",
+    "resources/sample-output/items/TPP-request-SAML.dc3e71240a962fe4dee21aa465d3d13f.json",
+    "resources/sample-output/items/Submit-Login-form.01f3c135a4509e2adcfe08a6ab6f0a3b.json",
+    "resources/sample-output/items/Follow-login-redirect.2b2dbd5b61468ad2ea614a8d2d8234eb.json",
+    "resources/sample-output/items/Follow-SAML-redirect.c54536c257cfb5c7b44344d8392de93e.json",
+    "resources/sample-output/items/Get-access-token-by-Consent-UI.25de25a8bd0eceab9c43a329fcbff629.json",
+    "resources/sample-output/items/Get-Consent-by-Consent-UI.6e801d3687ff2279e3b7b2fd42f35e9a.json",
+    "resources/sample-output/items/Submit-Consent.1dcecfbaa65f744a17c2f5fd7123e553.json",
+    "resources/sample-output/items/Follow-Resume-redirect.45e41091ad9073fa0184bb6177dd773f.json",
+    "resources/sample-output/items/Get-Access-Token-from-Code.f9113c005a45bf01f9ee47ce400ce7e9.json",
+    "resources/sample-output/items/Get-access-token-for-Arrangement-Check.512c29752331dbe9d1388d911d8e5ec1.json",
+    "resources/sample-output/items/Get-Consent-for-Arrangement-Check.fbffc49691b08f215b197a437ce5f07b.json"
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {}
+}
