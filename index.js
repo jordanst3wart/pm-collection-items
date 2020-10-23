@@ -76,7 +76,7 @@ function breakdownCollection(collectionPath, outputPath) {
     var collectionWithoutIds = removeKeys(myCollection.toJSON(), ["id","postman_id","_postman_id"]);
     var hash = helpers.generateHash(collectionWithoutIds);
     name = outputPath + '/collections/' + myCollection["name"].replace(/ /g, "-") + "." + hash + ".json";
-    ensureDirectory(outputPath +'/collections');
+    ensureDirectory(outputPath);
     fs.writeFileSync(name, JSON.stringify(collectionWithoutIds, null, 2));
     return name;
 }
@@ -146,7 +146,16 @@ function readFilesInDir(path){
     return filePaths;
 }
 
-var inputFiles = readFilesInDir(args["inputDir"]);
+if(args["reconstructCollection"]){
+    // TODO don't hardcode /collections
+    var inputFiles = readFilesInDir(args["inputDir"] + "/collections");
+} else {
+    var inputFiles = readFilesInDir(args["inputDir"]);
+}
+
+if(inputFiles.length === 0){
+    console.log("No files selected...")
+}
 
 // TODO ensure no trailing "/" in paths
 if(args["breakdownCollection"]){
