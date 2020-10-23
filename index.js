@@ -137,18 +137,11 @@ var pathBreakdown = [];
 //var currentPath = process.cwd()
 function readFilesInDir(path){
     var filePaths = [];
-    fs.readdirSync(path).forEach(file => {
-        // Getting information for a file
-        fs.stat(path + "/" + file, (error, stats) => {
-            if (error) {
-                console.log(error);
-            }
-            else {
-                if(stats.isFile()){
-                    filePaths.push(path + "/" + file);
-                }
-            }
-        });
+    fs.readdirSync(path).map(file => {
+        var stats = fs.statSync(path + "/" + file);
+        if(stats.isFile()){
+            filePaths.push(path + "/" + file);
+        }
     });
     return filePaths;
 }
@@ -157,6 +150,7 @@ var inputFiles = readFilesInDir(args["inputDir"]);
 
 // TODO ensure no trailing "/" in paths
 if(args["breakdownCollection"]){
+    console.log(inputFiles);
     inputFiles.map(path => {
         pathBreakdown.push(breakdownCollection(path, args["outputDir"]));
     })
