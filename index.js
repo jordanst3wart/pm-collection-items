@@ -52,16 +52,18 @@ function breakdownCollection(collectionPath, outputPath) {
     var nameList2 = [];
     members.forEach((member => {
         var nameList = [];
-        member["items"]["members"].forEach((item => {
-            var itemWithoutIds = removeKeys(item.toJSON(), ["id"]);
-            var hash = helpers.generateHash(itemWithoutIds);
-            // TODO might not need to replace things with a '-'
-            name = outputPath + '/items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
-            ensureDirectory(outputPath + '/items');
-            fs.writeFileSync(name, JSON.stringify(itemWithoutIds, null, 2));
-            nameList.push(name)
-        }))
-        member["item"] = nameList;
+        if ("items" in member){
+            member["items"]["members"].forEach((item => {
+                var itemWithoutIds = removeKeys(item.toJSON(), ["id"]);
+                var hash = helpers.generateHash(itemWithoutIds);
+                // TODO might not need to replace things with a '-'
+                name = outputPath + '/items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
+                ensureDirectory(outputPath + '/items');
+                fs.writeFileSync(name, JSON.stringify(itemWithoutIds, null, 2));
+                nameList.push(name)
+            }))
+            member["item"] = nameList;
+        }
 
 
         var memberWithoutIds = removeKeys(member.toJSON(), ["id"]);
@@ -92,12 +94,14 @@ function reconstructCollection(collectionPath, outputPath) {
         var item1 = helpers.readJson(member1);
         newItemGroups.push(item1);
 
-        var newItems = []
-        item1["item"].map((member2) => {
-            var item2 = helpers.readJson(member2);
-            newItems.push(item2);
-        })
-        item1["item"] = newItems;
+        if ("items" in item1) {
+            var newItems = []
+            item1["item"].map((member2) => {
+                var item2 = helpers.readJson(member2);
+                newItems.push(item2);
+            })
+            item1["item"] = newItems;
+        }
     }))
 
     shortenedCollection["item"] = newItemGroups;
