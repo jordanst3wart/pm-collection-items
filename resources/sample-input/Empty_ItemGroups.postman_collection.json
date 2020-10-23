@@ -1,0 +1,104 @@
+{
+	"info": {
+		"_postman_id": "b6cf645d-463a-4ea3-9db6-d6d80d0e47ec",
+		"name": "Empty_ItemGroups",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Empty Item Group",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "758aad94-385f-473b-8d50-a4c810c76fb4",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "20fb3490-bf38-49f5-91fd-1133decee64b",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Get a single booking",
+			"item": [],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						],
+						"id": "639577eb-45a4-404b-8165-84130dad189a"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"if(pm.response.to.have.header('Content-Type') === 'application/json; charset=utf-8') {",
+							"    pm.test(\"Response data format is correct\", () => {",
+							"    var jsonData = pm.response.json()",
+							"    pm.expect(jsonData.firstname).to.be.a('string')",
+							"    pm.expect(jsonData.lastname).to.be.a('string')",
+							"    pm.expect(jsonData.totalprice).to.a('number')",
+							"    pm.expect(jsonData.depositpaid).to.be.a('boolean')",
+							"    pm.expect(jsonData.bookingdates.checkin).to.be.a('string')",
+							"    pm.expect(jsonData.bookingdates.checkin).to.match(/^\\d{4}-\\d{2}-\\d{2}$/)",
+							"    pm.expect(jsonData.bookingdates.checkout).to.be.a('string')",
+							"    pm.expect(jsonData.bookingdates.checkout).to.match(/^\\d{4}-\\d{2}-\\d{2}$/)",
+							"});",
+							"",
+							"(pm.response.json().additionalneeds === undefined ? pm.test.skip : pm.test)('Customer has additional needs', () => {",
+							"        pm.expect(pm.response.json().additionalneeds).to.be.a('string')",
+							"});",
+							"}",
+							"",
+							""
+						],
+						"id": "f02055b9-c2b9-48ca-a302-dcc3bf8f9b7d"
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "c2e4b65b-8a95-4042-8628-35a6add6ac42"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				],
+				"id": "b0ff95af-c1c8-44de-a33f-509c081be281"
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
