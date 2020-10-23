@@ -5,6 +5,6 @@
 - [done] think of name
 - get file cli api working
 - write more tests with collections
-- clean up old directorys
+- [done] clean up old directorys
 - [WIP] read all items, and write to file
 - [WIP] refactor to multiple files

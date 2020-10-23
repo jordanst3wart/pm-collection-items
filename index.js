@@ -103,7 +103,7 @@ function reconstructCollection(collectionPath, outputPath) {
     shortenedCollection["item"] = newItemGroups;
 
     var filenameSplit = filename.split('.')
-    var path = outputPath + "/" + filenameSplit[0] + "." + filenameSplit[2];
+    var path = outputPath + "/" + filenameSplit[0] + ".postman_collection" + "." + filenameSplit[2];
     fs.writeFileSync(path, JSON.stringify(shortenedCollection, null, 2));
     return path;
 }
