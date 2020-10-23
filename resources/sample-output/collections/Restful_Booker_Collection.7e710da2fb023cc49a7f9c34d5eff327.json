@@ -1,0 +1,33 @@
+{
+  "item": [
+    "resources/sample-output/itemGroups/Health-Check.5625eccba2a75199a621ada7d596ecc0.json",
+    "resources/sample-output/itemGroups/Get-all-Bookings.ff5387bba05cb0cceb637f86337d069f.json",
+    "resources/sample-output/itemGroups/Get-a-single-booking.1cfb02a4969ff635e8466598e274d539.json",
+    "resources/sample-output/itemGroups/Create-a-new-booking.1d1e84021a21e8d886eb05236f19326a.json"
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [],
+  "info": {
+    "name": "Restful_Booker_Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}

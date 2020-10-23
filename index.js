@@ -34,7 +34,7 @@ var args = parser.parse_args();
 
 function ensureDirectory(path){
     if (!fs.existsSync(path)) {
-        fs.mkdir(path, {recursive: true},function(err) {
+        fs.mkdirSync(path, {recursive: true},function(err) {
             if (err) {
                 console.log(err)
             } else {
@@ -57,7 +57,7 @@ function breakdownCollection(collectionPath, outputPath) {
             var hash = helpers.generateHash(itemWithoutIds);
             // TODO might not need to replace things with a '-'
             name = outputPath + '/items/' + item["name"].replace(/ /g, "-") + "." + hash + ".json";
-            ensureDirectory(outputPath +'/items');
+            ensureDirectory(outputPath + '/items');
             fs.writeFileSync(name, JSON.stringify(itemWithoutIds, null, 2));
             nameList.push(name)
         }))
@@ -67,7 +67,7 @@ function breakdownCollection(collectionPath, outputPath) {
         var memberWithoutIds = removeKeys(member.toJSON(), ["id"]);
         var hash = helpers.generateHash(memberWithoutIds);
         name = outputPath + '/itemGroups/' + member["name"].replace(/ /g, "-") + "." + hash + ".json";
-        ensureDirectory(outputPath +'/itemGroups');
+        ensureDirectory(outputPath + '/itemGroups');
         fs.writeFileSync(name, JSON.stringify(memberWithoutIds, null, 2));
         nameList2.push(name);
     }))
@@ -77,7 +77,7 @@ function breakdownCollection(collectionPath, outputPath) {
     var collectionWithoutIds = removeKeys(myCollection.toJSON(), ["id","postman_id","_postman_id"]);
     var hash = helpers.generateHash(collectionWithoutIds);
     name = outputPath + '/collections/' + myCollection["name"].replace(/ /g, "-") + "." + hash + ".json";
-    ensureDirectory(outputPath);
+    ensureDirectory(outputPath + '/collections');
     fs.writeFileSync(name, JSON.stringify(collectionWithoutIds, null, 2));
     return name;
 }
