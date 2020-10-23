@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./index.js  --breakdownCollection --inputDir collections  --outputDir /tmp
+./index.js  --breakdownCollection --inputDir resources/sample-input  --outputDir resources/sample-output
