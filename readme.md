@@ -1,16 +1,19 @@
-// Save common tests in a global variable
-postman.setGlobalVariable("commonTests", () => {
-  // The Content-Type must be JSON
-  tests["Content-Type header is set"] = postman.getResponseHeader("Content-Type") === "application/json";
-  // The response time must be less than 500 milliseconds
-  tests["Response time is acceptable"] = responseTime < 500;
-  // The response body must include an "id" property
-  var data = JSON.parse(responseBody);
-  tests["Response has an ID"] = data.id !== undefined;
-});
+# postman-collection-items
 
-// First, run the common tests
-eval(globals.commonTests)();
+Breaks postman collections down to the items in the collection. So that they can be reused across different collections.
 
-//^ should be able to do something like
-eval(gobals.commonFunction)(newInput1,newInput2);
+```
+postman-collection-items --breakdownCollection   --inputDir collections  --outputDir postman
+postman-collection-items --reconstructCollection --inputDir postman      --outputDir collections
+```
+
+Install:
+```
+npm install -g postman-collection-items
+```
+
+
+Release as a NPM module
+
+Samples:
+https://github.com/Phara0h/Postgen
