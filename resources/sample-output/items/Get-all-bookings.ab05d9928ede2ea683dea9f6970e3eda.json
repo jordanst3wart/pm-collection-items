@@ -1,0 +1,32 @@
+{
+  "name": "Get all bookings",
+  "request": {
+    "url": {
+      "path": [
+        "booking"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+        ]
+      }
+    }
+  ]
+}

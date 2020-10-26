@@ -1,0 +1,32 @@
+{
+  "item": [
+    "resources/sample-output/itemGroups/Empty.32eba13cd50765027f0bf6ac25d495cf.json",
+    "resources/sample-output/itemGroups/Ping-the-API.283a272985570fc774a06306ed2836b7.json"
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {},
+  "variable": [],
+  "info": {
+    "name": "Top_Level_Item",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}

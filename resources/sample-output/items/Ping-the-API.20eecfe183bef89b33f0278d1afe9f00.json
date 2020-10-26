@@ -1,0 +1,45 @@
+{
+  "name": "Ping the API",
+  "request": {
+    "url": {
+      "path": [
+        "ping"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201))",
+          "",
+          "pm.test('Content-Type header is correct', () => pm.response.to.have.header('Content-Type', 'text/plain; charset=utf-8'))"
+        ]
+      }
+    },
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "",
+          "",
+          ""
+        ]
+      }
+    }
+  ]
+}

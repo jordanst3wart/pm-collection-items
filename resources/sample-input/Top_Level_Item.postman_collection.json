@@ -1,0 +1,77 @@
+{
+  "item": [
+    {
+      "name": "Empty",
+      "item": [],
+      "event": [],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "Ping the API",
+      "request": {
+        "url": {
+          "path": [
+            "ping"
+          ],
+          "host": [
+            "{{baseURL}}"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "method": "GET"
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", () => pm.response.to.have.status(201))",
+              "",
+              "pm.test('Content-Type header is correct', () => pm.response.to.have.header('Content-Type', 'text/plain; charset=utf-8'))"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "",
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {},
+  "variable": [],
+  "info": {
+    "name": "Top_Level_Item",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}

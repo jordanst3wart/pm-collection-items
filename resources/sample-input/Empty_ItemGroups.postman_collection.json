@@ -1,0 +1,98 @@
+{
+  "item": [
+    {
+      "name": "Empty Item Group",
+      "item": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {}
+    },
+    {
+      "name": "Get a single booking",
+      "item": [],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if(pm.response.to.have.header('Content-Type') === 'application/json; charset=utf-8') {",
+              "    pm.test(\"Response data format is correct\", () => {",
+              "    var jsonData = pm.response.json()",
+              "    pm.expect(jsonData.firstname).to.be.a('string')",
+              "    pm.expect(jsonData.lastname).to.be.a('string')",
+              "    pm.expect(jsonData.totalprice).to.a('number')",
+              "    pm.expect(jsonData.depositpaid).to.be.a('boolean')",
+              "    pm.expect(jsonData.bookingdates.checkin).to.be.a('string')",
+              "    pm.expect(jsonData.bookingdates.checkin).to.match(/^\\d{4}-\\d{2}-\\d{2}$/)",
+              "    pm.expect(jsonData.bookingdates.checkout).to.be.a('string')",
+              "    pm.expect(jsonData.bookingdates.checkout).to.match(/^\\d{4}-\\d{2}-\\d{2}$/)",
+              "});",
+              "",
+              "(pm.response.json().additionalneeds === undefined ? pm.test.skip : pm.test)('Customer has additional needs', () => {",
+              "        pm.expect(pm.response.json().additionalneeds).to.be.a('string')",
+              "});",
+              "}",
+              "",
+              ""
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {}
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {},
+  "variable": [],
+  "info": {
+    "name": "Empty_ItemGroups",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}

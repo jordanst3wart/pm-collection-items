@@ -1,0 +1,39 @@
+{
+  "name": "Get a single booking with XML header set",
+  "request": {
+    "url": {
+      "path": [
+        "booking",
+        "1"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "header": [
+      {
+        "key": "Accept",
+        "value": "application/xml"
+      }
+    ],
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+        ]
+      }
+    }
+  ]
+}

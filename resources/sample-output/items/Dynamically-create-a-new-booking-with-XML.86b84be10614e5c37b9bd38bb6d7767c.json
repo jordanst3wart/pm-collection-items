@@ -1,0 +1,77 @@
+{
+  "name": "Dynamically create a new booking with XML",
+  "request": {
+    "url": {
+      "path": [
+        "booking"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "header": [
+      {
+        "key": "Content-Type",
+        "value": "text/xml"
+      },
+      {
+        "key": "Accept",
+        "value": "application/xml"
+      }
+    ],
+    "method": "POST",
+    "body": {
+      "mode": "raw",
+      "raw": "<booking>\r\n    <firstname>{{first_name}}</firstname>\r\n    <lastname>{{last_name}}</lastname>\r\n    <totalprice>{{total_price}}</totalprice>\r\n    <depositpaid>{{depositPaid}}</depositpaid>\r\n    <additionalneeds>{{additional_needs}}</additionalneeds>\r\n    <bookingdates>\r\n        <checkin>{{check_in}}</checkin>\r\n        <checkout>{{check_out}}</checkout>\r\n    </bookingdates>\r\n</booking>"
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
+          "    var firstname = res.json().results[0].name.first",
+          "    var lastname  = res.json().results[0].name.last",
+          "    pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
+          "    pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
+          "})",
+          "",
+          "pm.environment.set(\"total_price\", _.random(0, 1000))",
+          "",
+          "const depositPaid = [true, false]",
+          "pm.environment.set(\"depositPaid\", _.shuffle(depositPaid)[0])",
+          "",
+          "const moment = require('moment')",
+          "pm.environment.set(\"check_in\", JSON.stringify(moment().format('YYYY-MM-DD')))",
+          "pm.environment.set(\"check_out\", JSON.stringify(moment().add(_.random(1, 14), 'days').format('YYYY-MM-DD')))",
+          "",
+          "const items = [\"None\", \"Breakfast\", \"Lunch\", \"Dinner\", \"Late Checkout\", \"Newspaper\", \"Extra Pillow\"]",
+          "pm.environment.set(\"additional_needs\", JSON.stringify(_.shuffle(items)[0]))"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
+          "",
+          "function cleanup() {",
+          "    const clean = ['first_name', 'last_name', 'total_price', 'depositPaid', 'check_in', 'check_out', 'additional_needs']",
+          "    for(let i = 0; i < clean.length; ++i){",
+          "        pm.environment.unset(clean[i])",
+          "    }",
+          "}",
+          "cleanup()",
+          ""
+        ]
+      }
+    }
+  ]
+}

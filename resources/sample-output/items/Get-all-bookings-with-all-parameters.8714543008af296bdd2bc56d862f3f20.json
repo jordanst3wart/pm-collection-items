@@ -1,0 +1,49 @@
+{
+  "name": "Get all bookings with all parameters",
+  "request": {
+    "url": {
+      "path": [
+        "booking"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [
+        {
+          "key": "firstname",
+          "value": "sally"
+        },
+        {
+          "key": "lastname",
+          "value": "brown"
+        },
+        {
+          "key": "checkin",
+          "value": "2017-11-11"
+        },
+        {
+          "key": "checkout",
+          "value": "2017-11-15"
+        }
+      ],
+      "variable": []
+    },
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+        ]
+      }
+    }
+  ]
+}

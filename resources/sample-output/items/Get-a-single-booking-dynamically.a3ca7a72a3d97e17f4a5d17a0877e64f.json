@@ -1,0 +1,46 @@
+{
+  "name": "Get a single booking dynamically",
+  "request": {
+    "url": {
+      "path": [
+        "booking",
+        "{{booking_id}}"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.environment.set(\"booking_id\", _.random(1,10))"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
+          "    ",
+          "",
+          "",
+          ""
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Get all bookings with the checkin parameter",
+  "request": {
+    "url": {
+      "path": [
+        "booking"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [
+        {
+          "key": "checkin",
+          "value": "2017-11-11"
+        }
+      ],
+      "variable": []
+    },
+    "method": "GET",
+    "body": {
+      "mode": "raw",
+      "raw": ""
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))"
+        ]
+      }
+    }
+  ]
+}

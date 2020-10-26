@@ -1,0 +1,32 @@
+{
+  "item": [
+    "resources/sample-output/itemGroups/Empty-Item-Group.012c1219c4abd9702c61356e672e9282.json",
+    "resources/sample-output/itemGroups/Get-a-single-booking.94f3159a2079a63fb113d19a6c0038c0.json"
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "protocolProfileBehavior": {},
+  "variable": [],
+  "info": {
+    "name": "Empty_ItemGroups",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}

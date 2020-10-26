@@ -1,0 +1,49 @@
+{
+  "name": "Create a new booking with JSON",
+  "request": {
+    "url": {
+      "path": [
+        "booking"
+      ],
+      "host": [
+        "{{baseURL}}"
+      ],
+      "query": [],
+      "variable": []
+    },
+    "header": [
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "method": "POST",
+    "body": {
+      "mode": "raw",
+      "raw": "{\r\n  \"firstname\" : \"Sally\",\r\n\t\"lastname\" : \"Brown\",\r\n\t\"totalprice\" : 111,\r\n\t\"depositpaid\" : true,\r\n\t\"additionalneeds\" : \"Breakfast\",\r\n\t\"bookingdates\" : {\r\n\t\t\"checkin\" : \"2013-02-23\",\r\n\t\t\"checkout\" : \"2014-10-23\"\r\n\t}\r\n}"
+    }
+  },
+  "response": [],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", () => pm.response.to.have.status(200))",
+          "",
+          ""
+        ]
+      }
+    }
+  ]
+}
