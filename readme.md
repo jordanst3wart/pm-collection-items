@@ -15,5 +15,6 @@ npm install -g postman-collection-items
 
 Release as a NPM module
 
-Samples:
+References:
 https://github.com/Phara0h/Postgen
+https://github.com/postmanlabs/newman
