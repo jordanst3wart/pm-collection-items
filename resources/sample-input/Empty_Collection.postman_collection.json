@@ -1,9 +1,10 @@
 {
-	"info": {
-		"_postman_id": "069ad8ec-7360-4ccf-adc5-13c15b3bc477",
-		"name": "Empty_Collection",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [],
-	"protocolProfileBehavior": {}
+  "item": [],
+  "event": [],
+  "protocolProfileBehavior": {},
+  "variable": [],
+  "info": {
+    "name": "Empty_Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
 }

@@ -8,3 +8,4 @@
 - [done] clean up old directorys
 - [WIP] read all items, and write to file
 - [WIP] refactor to multiple files
+- integration test collections
