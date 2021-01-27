@@ -10,4 +10,4 @@
 - [WIP] refactor to multiple files
 - integration test collections
 - [done] Change name to p-collection-items to avoid trademark (npm done, github repo)
-- 2fa for NPM
+- [done] 2fa for NPM

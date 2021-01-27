@@ -1,15 +1,20 @@
 # postman-collection-items
 
-Breaks postman collections down to the items in the collection. So that they can be reused across different collections.
+Breaks postman collections down to the individual items, so that they can be reused across different collections.
 
+Usage:
 ```
-postman-collection-items --breakdownCollection   --inputDir collections  --outputDir postman
-postman-collection-items --reconstructCollection --inputDir postman      --outputDir collections
+pm-collection-items --breakdownCollection   --inputDir collections  --outputDir postman
+# breaks the collection down to:
+pm-collection-items --reconstructCollection --inputDir postman      --outputDir collections
+# reconstructs the collection to:
 ```
+
+
 
 Install:
 ```
-npm install -g postman-collection-items
+npm install -g pm-collection-items
 ```
 
 
@@ -18,6 +23,3 @@ Release as a NPM module
 References:
 https://github.com/Phara0h/Postgen
 https://github.com/postmanlabs/newman
-
-Change name to:
- p-collection-items
