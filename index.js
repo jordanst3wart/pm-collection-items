@@ -14,9 +14,6 @@ const pm_collection = require('./lib/pm-collection');
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
-var Collection = require("postman-collection").Collection;
-var fs = require('fs'); // needed to read JSON file from disk
-var mPath = require('path');
 
 
 const parser = new ArgumentParser({
@@ -31,7 +28,7 @@ parser.add_argument('-t','--roundTrip', { help: 'Runs breakdown, reconstruct, an
 //parser.add_argument('-f','--file', { help: 'Breaks down a single collection in __ dir, rather than all of them' });
 parser.add_argument('-i','--inputDir', { help: 'Input directory', required: true });
 parser.add_argument('-o','--outputDir', { help: 'Output directory', required: true });
-var args = parser.parse_args();
+let args = parser.parse_args();
 
 
 
