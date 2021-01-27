@@ -18,3 +18,6 @@ Release as a NPM module
 References:
 https://github.com/Phara0h/Postgen
 https://github.com/postmanlabs/newman
+
+Change name to:
+ p-collection-items

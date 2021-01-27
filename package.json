@@ -1,8 +1,9 @@
 {
-  "name": "collection-poc",
+  "name": "pm-collection-items",
   "version": "1.0.0-beta.0",
   "description": "",
   "repository": "github.com/jordanst3wart/postman-collection-items",
+  "keywords": ["postman","collection","cli"],
   "main": "index.js",
   "scripts": {
     "run": "node index",
