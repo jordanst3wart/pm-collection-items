@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # breakdown/deconstruct files
+# TODO fails on something
 ./index.js  --breakdownCollection --inputDir resources/sample-input  --outputDir resources/sample-output
 
 # reconstruct/construct files
