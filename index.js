@@ -9,7 +9,6 @@
 // itemGroups[references of items]
 // collection[references of itemGroups, and items]
 const helpers = require('./lib/helpers');
-const removeKeys = require('./lib/removeKeys');
 const pm_collection = require('./lib/pm-collection');
 
 const { ArgumentParser } = require('argparse');
@@ -36,9 +35,9 @@ let args = parser.parse_args();
 // if single file use that as a list
 // else get all files
 // get files
-var pathReconstruct;
-var pathBreakdown = [];
-var inputFiles;
+let pathReconstruct;
+let pathBreakdown = [];
+let inputFiles;
 
 if(args["reconstructCollection"]){
     // TODO don't hardcode /collections
@@ -67,7 +66,7 @@ if(args["reconstructCollection"]){
 if(args["assertTransform"]){
     // runBreakdown=true; assumes they will already be broken down
     pathReconstruct = pm_collection.reconstructCollection(pathBreakdown);
-    assertTransform('input/CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json', pathReconstruct);
+    pm_collection.assertTransform('input/CIAM_internet_TPP_Initiated_Consent_Revocation.postman_collection.json', pathReconstruct);
 }
 
 if(args["roundTrip"]){
@@ -80,7 +79,7 @@ if(args["roundTrip"]){
     })
 
     // TODO change function
-    assertTransform(pathBreakdown, pathReconstruct);
+    pm_collection.assertTransform(pathBreakdown, pathReconstruct);
 }
 
 
