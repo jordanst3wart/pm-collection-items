@@ -23,3 +23,6 @@ Release as a NPM module
 References:
 https://github.com/Phara0h/Postgen
 https://github.com/postmanlabs/newman
+
+
+Removes the ids that get dynamically generated, to stop files changing unnecessary.

@@ -11,3 +11,11 @@
 - integration test collections
 - [done] Change name to p-collection-items to avoid trademark (npm done, github repo)
 - [done] 2fa for NPM
+
+- [] breakdown files into
+ collections
+ itemGroups
+ items
+ javascript (only if over a number of characters) next aim...
+  
+- if duplicate name, and not the same file contents use a hash, and log a warning...
