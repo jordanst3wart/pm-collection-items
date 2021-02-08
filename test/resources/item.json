@@ -1,0 +1,33 @@
+{
+  "name": "Enroll Google Authenticator Factor",
+  "request": {
+    "method": "POST",
+    "header": [
+      {
+        "key": "Accept",
+        "value": "application/json"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"stateToken\" : \"{{stateToken}}\",\n  \"factorType\": \"token:software:totp\",\n  \"provider\": \"GOOGLE\"\n}"
+    },
+    "url": {
+      "raw": "{{url}}/api/v1/authn/factors",
+      "host": [
+        "{{url}}"
+      ],
+      "path": [
+        "api",
+        "v1",
+        "authn",
+        "factors"
+      ]
+    }
+  },
+  "response": []
+}

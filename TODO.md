@@ -12,6 +12,9 @@
 - [done] Change name to p-collection-items to avoid trademark (npm done, github repo)
 - [done] 2fa for NPM
 
+- setup linting
+- change to TypeScript
+
 - [] breakdown files into
  collections
  itemGroups
